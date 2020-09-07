@@ -1,10 +1,10 @@
 defmodule ExMon.Player do
   @max_life 100
   @require_keys [:life, :moves, :name]
-  @msg_game_started "The game is started"
 
   alias ExMon.Game
   alias ExMon.Game.Actions
+  alias ExMon.Game.Status
 
   @enforce_keys @require_keys
   defstruct @require_keys
@@ -26,16 +26,26 @@ defmodule ExMon.Player do
     |> create_player(:punch, :kick, :heal)
     |> Game.start(player)
 
-    print_status_game()
+    Status.print_round_message(Game.info())
   end
 
   def make_move(move) do
-    Actions.fetch_move(move)
+    move
+    |> Actions.fetch_move()
+    |> do_move()
   end
 
-  defp print_status_game() do
-    IO.puts("\n======= #{@msg_game_started} =======\n")
-    Game.info() |> IO.inspect()
-    IO.puts("\n====================================\n")
+  defp do_move({:ok, move}) do
+    case move do
+      :move_heal -> "realiza a cura"
+      move -> Actions.attack(move)
+    end
+
+    Game.info()
+    |> Status.print_round_message()
+  end
+
+  defp do_move({:error, move}) do
+    Status.print_wrong_move_message(move)
   end
 end
