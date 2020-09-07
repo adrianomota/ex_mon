@@ -1,20 +1,23 @@
 defmodule ExMon.Player do
   @max_life 100
-  @require_keys [:life, :name, :move_rnd, :move_avg, :move_heal]
+  @require_keys [:life, :moves, :name]
   @msg_game_started "The game is started"
 
   alias ExMon.Game
+  alias ExMon.Game.Actions
 
   @enforce_keys @require_keys
   defstruct @require_keys
 
   def create_player(name, move_rnd, move_avg, move_heal) do
     %ExMon.Player{
-      name: name,
-      move_rnd: move_rnd,
-      move_avg: move_avg,
-      move_heal: move_heal,
-      life: @max_life
+      life: @max_life,
+      moves: %{
+        move_rnd: move_rnd,
+        move_avg: move_avg,
+        move_heal: move_heal
+      },
+      name: name
     }
   end
 
@@ -24,6 +27,10 @@ defmodule ExMon.Player do
     |> Game.start(player)
 
     print_status_game()
+  end
+
+  def make_move(move) do
+    Actions.fetch_move(move)
   end
 
   defp print_status_game() do
